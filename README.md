@@ -343,6 +343,7 @@ GET /search/quotes
 | param     | type                           | Description                                                   |
 | :-------- | :----------------------------- | :------------------------------------------------------------ |
 | query      | `String`                       | The search query           |typos and minor mispellings. Max: 2 Default: 0           |
+| path | `String` | A comma separated list of fields to target in the search. Supported fields are "content", "author", "tags". By default, It will search "content" and "author". 
 | limit     | `Int`                          | The number of authors to return per request. (for pagination) |
 | skip      | `Int`                          | The number of items to skip (for pagination)                  |
 
