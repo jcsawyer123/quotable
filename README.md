@@ -1,5 +1,17 @@
 # Quotable
 
+### Branch: Atlas Search 
+This is an experimental branch that uses [Atlas Search](https://www.mongodb.com/atlas/search), MongoDB's new search engine feature. It includes two new API methods:
+
+- [search quotes](#search-quotes) 
+- [search authors](#search-authors)
+
+This branch is deployed here: 
+
+https://quotable-api-feature-at-xfy1z6.herokuapp.com/
+
+---
+
  Quotable is a free, open source quotations API. It was originally built as part of a [FreeCodeCamp](https://www.freecodecamp.org/) project. The database includes over 2000 quotes by 900 authors. 
  
 - [Servers](#servers)
@@ -10,6 +22,8 @@
   - [List Authors](#list-authors)
   - [Get Author By ID](#get-author-by-id)
   - [List Tags](#list-tags)
+  - [Search Authors](#search-authors)
+  - [Search Quotes](#search-quotes)
 - [Usage](#usage)
   - [Live Examples](#live-examples)
 - [Contributing](#contributing)
@@ -234,6 +248,144 @@ GET /tags
   }>
 }
 ```
+
+
+### Search Authors
+
+Search for authors by name. This feature is intended to power a search bar that displays autocomplete
+suggestions as the user types. 
+
+**Features**
+
+- Search for authors by first name, last name, or full name
+- Optional autocomplete results
+- Optional fuzzy search to accommodate minor misspellings
+- Results are sorted based on [text matching score](https://docs.atlas.mongodb.com/reference/atlas-search/scoring/) (how well they match the
+  search terms).
+- Things like middle name, middle initial, prefixes, and suffixes are not
+  required for a name to match. However, they will increase the score of
+  a result if they do match.
+- Ignores punctuation, and case, and diacritics
+
+**Path**
+
+```HTTP
+GET /search/authors
+```
+
+**Query parameters**
+
+| param     | type                           | Description                                                   |
+| :-------- | :----------------------------- | :------------------------------------------------------------ |
+| query      | `String`                       | The search query           |
+| autocomplete    | `Boolean` | Enable autocomplete style results             |
+| fuzzyMaxEdits | Int        | Settings this to a positve number will enable fuzzy matching to accommodate typos and minor mispellings. Max: 2 Default: 0           |
+| limit     | `Int`                          | The number of authors to return per request. (for pagination) |
+| skip      | `Int`                          | The number of items to skip (for pagination)                  |
+
+**Response**
+
+```ts
+{
+  // The number of authors return by this request.
+  count: number
+  // The total number of authors matching this request.
+  totalCount: number
+  // The index of the last item returned. When paginating through results,
+  // this value would be used as the `skip` parameter when requesting the next
+  // "page" of results. It will be set to `null` if there are no additional results.
+  lastItemIndex: number | null
+  // The array of authors
+  results: Array<{
+    // A unique id for this author
+    _id: string
+    // The authors full name
+    name: string 
+    // The number of quotes by this author
+    quoteCount: string
+  }>
+}
+```
+
+**Examples**
+
+Search for authors named "albert" ([try in browser](https://quotable-api-feature-at-xfy1z6.herokuapp.com/search/authors?query=albert))
+
+```HTTP
+GET /search/authors?query=albert
+```
+
+### Search Quotes
+
+ Search for quotes by content, author, and tags.
+
+ **Features**
+
+- Search multiple fields simultaneously, or limit the search to a single
+  field for more targeted searches. By default, the method will search
+  in `content` and `author`.
+- Search results are sorted based on [text matching score](https://docs.atlas.mongodb.com/reference/atlas-search/scoring/) (how well they
+  match the search terms)
+- By default, this method will use [full text search](https://docs.atlas.mongodb.com/reference/atlas-search/text/)
+- If the `query` is wrapped in quotes, this method will use the [`$phrase`](https://docs.atlas.mongodb.com/reference/atlas-search/phrase/)
+operator to search for an exact phrase. This will only return documents
+where the specified field contains **all** of the search terms in order.
+
+
+**Path**
+
+```HTTP
+GET /search/quotes
+```
+
+**Query parameters**
+
+| param     | type                           | Description                                                   |
+| :-------- | :----------------------------- | :------------------------------------------------------------ |
+| query      | `String`                       | The search query           |typos and minor mispellings. Max: 2 Default: 0           |
+| limit     | `Int`                          | The number of authors to return per request. (for pagination) |
+| skip      | `Int`                          | The number of items to skip (for pagination)                  |
+
+**Response**
+
+```ts
+{
+  // The number of quotes returned by this request
+  count: number
+  // The total number of quotes matching this request
+  totalCount: number
+  // The index of the last quote returned. When paginating through results,
+  // this value would be used as the `skip` parameter when requesting the next
+  // "page" of results.
+  lastItemIndex: number
+  // The array of quotes
+  results: Array<{
+    _id: string
+    // The quotation text
+    content: string
+    // The full name of the author
+    author: string
+    // The length of quote (number of characters)
+    length: number
+    // An array of tag names for this quote
+    tags: [string]
+  }>
+}
+```
+**Examples**
+
+Search for "divided house" ([try in browser](https://quotable-api-feature-at-xfy1z6.herokuapp.com/search/quotes?query=a+divided+house))
+```HTTP
+GET /search/quotes?query=divided+house
+```
+
+Search for "friendship" ([try in browser](https://quotable-api-feature-at-xfy1z6.herokuapp.com/search/quotes?query=friendship))
+
+```HTTP
+GET /search/quotes?query=friendship
+```
+
+
 
 ## Usage
 
