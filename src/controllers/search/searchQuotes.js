@@ -89,7 +89,7 @@ module.exports = async function searchQuotes(req, res, next) {
     // 1. Fetch a paginated set of results
     // 2. Count the total number of documents that match the query
     const [results, [{ totalCount = 0 } = {}]] = await Promise.all([
-      Quote.aggregate([{ $searchBeta }, { $limit: limit }, { $skip: skip }]),
+      Quote.aggregate([{ $searchBeta }, { $skip: skip }, { $limit: limit }]),
       Quote.aggregate([{ $searchBeta }, { $count: 'totalCount' }]),
     ])
 
